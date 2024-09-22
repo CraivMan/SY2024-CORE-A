@@ -4,9 +4,13 @@
 
 package frc.robot;
 
+import java.util.function.BooleanSupplier;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,7 +19,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.CommandBuilder;
-import frc.robot.commands.components.TeleopSwerve;
+import frc.robot.commands.components.SwerveHandler;
 import frc.robot.subsystems.IntakeIndexer;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.BackLimelight;
@@ -45,6 +49,9 @@ public class RobotContainer {
   private final IntakeIndexer intakeIndexer = new IntakeIndexer();
   private final Shooter shooter = new Shooter();
 
+  private boolean robotSwerve = true;
+  private Pose3d targetPose3d = new Pose3d();
+
   public RobotContainer() {
 
     NamedCommands.registerCommand("Shoot Speaker", CommandBuilder.Shoot(intakeIndexer, shooter));
@@ -52,14 +59,17 @@ public class RobotContainer {
     NamedCommands.registerCommand("Intake Note", CommandBuilder.IntakeNote(intakeIndexer));
 
     drivetrain.setDefaultCommand(
-        new TeleopSwerve(
+        new SwerveHandler(
             drivetrain,
             () -> -driveController.getLeftY(), // Translation
             () -> -driveController.getLeftX(), // Strafe
             () -> -driveController.getRightX(), // Rotation
-            () -> driveController.rightTrigger().getAsBoolean() // Field-oriented driving (yes or no)
+            () -> driveController.rightTrigger().getAsBoolean(), // Field-oriented driving (yes or no)
+            () -> robotSwerve,
+            () -> targetPose3d
         )
     );
+
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -70,43 +80,49 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    driveController.a().onTrue(new InstantCommand(() -> {
-      drivetrain.zeroGyro();
-    }, drivetrain));
-
-    // Left red button - Intake
-    manipulatorController.leftBumper().toggleOnTrue(CommandBuilder.IntakeNote(intakeIndexer));
-
-    // Right red button - Source
-    manipulatorController.povDown().onTrue(CommandBuilder.IntakeFromSource(intakeIndexer, shooter));
-    
-    // Left yellow button - A (Amp) Shoot
-    manipulatorController.b().onTrue(CommandBuilder.ShootAmp(intakeIndexer, shooter, pneumatics));
-
-    // Right yellow button - Shoot
-    manipulatorController.rightBumper().onTrue(CommandBuilder.Shoot(intakeIndexer, shooter));
-
-    // Top blue button - Climb
-    manipulatorController.y().onTrue(
-      new InstantCommand(() -> {
-        pneumatics.toggleClimber();
-      }, pneumatics)
-    );
-    
-    // Bottom blue button - Panel
-    manipulatorController.x().onTrue(
-      new InstantCommand(() -> {
-        pneumatics.toggleAmpGuide();    
-      }, pneumatics)
-    );
-
-    // Black button - spit
-    manipulatorController.leftTrigger().onTrue(new SequentialCommandGroup(
-      new InstantCommand(() -> intakeIndexer.startSpittingNote()),
-      new WaitCommand(1),
-      new InstantCommand(() -> intakeIndexer.stop())
-    ));
+    driveController.axisGreaterThan(0, 0.1).onTrue(new InstantCommand(() -> {
+      robotSwerve = !robotSwerve;
+    }));
   }
+
+  // private void configureBindings() {
+  //   driveController.a().onTrue(new InstantCommand(() -> {
+  //     drivetrain.zeroGyro();
+  //   }, drivetrain));
+
+  //   // Left red button - Intake
+  //   manipulatorController.leftBumper().toggleOnTrue(CommandBuilder.IntakeNote(intakeIndexer));
+
+  //   // Right red button - Source
+  //   manipulatorController.povDown().onTrue(CommandBuilder.IntakeFromSource(intakeIndexer, shooter));
+    
+  //   // Left yellow button - A (Amp) Shoot
+  //   manipulatorController.b().onTrue(CommandBuilder.ShootAmp(intakeIndexer, shooter, pneumatics));
+
+  //   // Right yellow button - Shoot
+  //   manipulatorController.rightBumper().onTrue(CommandBuilder.Shoot(intakeIndexer, shooter));
+
+  //   // Top blue button - Climb
+  //   manipulatorController.y().onTrue(
+  //     new InstantCommand(() -> {
+  //       pneumatics.toggleClimber();
+  //     }, pneumatics)
+  //   );
+    
+  //   // Bottom blue button - Panel
+  //   manipulatorController.x().onTrue(
+  //     new InstantCommand(() -> {
+  //       pneumatics.toggleAmpGuide();    
+  //     }, pneumatics)
+  //   );
+
+  //   // Black button - spit
+  //   manipulatorController.leftTrigger().onTrue(new SequentialCommandGroup(
+  //     new InstantCommand(() -> intakeIndexer.startSpittingNote()),
+  //     new WaitCommand(1),
+  //     new InstantCommand(() -> intakeIndexer.stop())
+  //   ));
+  // }
 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();

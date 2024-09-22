@@ -88,7 +88,7 @@ public class Swerve extends SubsystemBase {
    * Drives Swerve towards the given target. For details on how this is done,
    * see {@link #drive(Translation2d, double, boolean, boolean)}.
    */
-  public void driveToTag(Pose3d target) {
+  public void advanceToTarget(Pose3d target) {
     SwerveModuleState[] states =
         Constants.Swerve.swerveKinematics.toSwerveModuleStates(
           new ChassisSpeeds(target.getX(), target.getY(), target.getRotation().getAngle()));
