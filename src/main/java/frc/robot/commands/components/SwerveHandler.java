@@ -8,6 +8,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.util.Pose3dSupplier;
+import frc.lib.util.TaskSupplier;
 import frc.robot.Constants;
 import frc.robot.subsystems.Swerve;
 
@@ -17,7 +18,7 @@ public class SwerveHandler extends Command {
     private BooleanSupplier operatorOverride;
 
     private Pose3dSupplier targetPose;
-    private BooleanSupplier ifPinged;
+    private TaskSupplier targetTask;
 
     private Swerve s_Swerve;
     private DoubleSupplier translationSup;
@@ -37,14 +38,14 @@ public class SwerveHandler extends Command {
       BooleanSupplier robotCentricSup,
       BooleanSupplier operatorOverride,
       Pose3dSupplier poseSupplier,
-      BooleanSupplier ifPinged) {
+      TaskSupplier targetTaskSupplier) {
     this.s_Swerve = s_Swerve;
     addRequirements(s_Swerve);
 
     this.operatorOverride = operatorOverride;
 
     this.targetPose = poseSupplier;
-    this.ifPinged = ifPinged;
+    targetTask = targetTaskSupplier;
 
     this.translationSup = translationSup;
     this.strafeSup = strafeSup;
@@ -55,13 +56,10 @@ public class SwerveHandler extends Command {
 
     @Override
     public void execute() {
-        if (ifPinged.getAsBoolean()) {
-            System.out.println("PING RECEIVEEEED");
-            robotControl = true;
-        }
-
         if (operatorOverride.getAsBoolean()) {
             robotControl = false;
+        } else if (targetTask.getAsTask().getStage() != 0) {
+            robotControl = true;
         }
 
 
@@ -85,10 +83,17 @@ public class SwerveHandler extends Command {
                 true);
 
             // System.out.println("USER");
-        } else {
-            s_Swerve.advanceToTarget(targetPose.getAsPose3d());
+            return;
+        }
+        
+        if (targetTask.getAsTask().getStage() == 1) {
+            s_Swerve.advanceToTarget(targetPose.getAsPose3d()); // Possibly change to an Optional in the future; missing Poses may cause errors
 
-            // System.out.println("ROBOT");
+            targetTask.getAsTask().advanceStage();
+        } else if (targetTask.getAsTask().getStage() == 2) {
+            // Add functionality to check whether the trajectory has been completed
+        } else if (targetTask.getAsTask().getStage() == 3) {
+            // Add functionality to inform another Subsystem or Command that the trajectory has been completed
         }
     }
 }

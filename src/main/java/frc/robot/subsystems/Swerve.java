@@ -92,7 +92,7 @@ public class Swerve extends SubsystemBase {
     SwerveModuleState[] states =
         Constants.Swerve.swerveKinematics.toSwerveModuleStates(
           // new ChassisSpeeds(target.getX(), target.getY(), target.getRotation().getAngle()));
-          new ChassisSpeeds(target.getX() / 2, target.getY() / 2, target.getRotation().getAngle()));
+          new ChassisSpeeds(target.getX() / 3, target.getY() / 3, target.getRotation().getAngle()));
 
 
     setModuleStates(states, false);

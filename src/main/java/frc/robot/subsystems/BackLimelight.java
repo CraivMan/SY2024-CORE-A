@@ -9,8 +9,8 @@ import frc.robot.Constants.Vision;
 
 public class BackLimelight extends SubsystemBase {
 
-    private OptionalDouble tx = OptionalDouble.empty();
-    private OptionalDouble ty = OptionalDouble.empty();
+    // private OptionalDouble tx = OptionalDouble.empty();
+    // private OptionalDouble ty = OptionalDouble.empty();
 
     public boolean hasTarget() {
         return (Optional.of(LimelightHelpers.getTX(Vision.BackLimelight.Name)).isPresent());

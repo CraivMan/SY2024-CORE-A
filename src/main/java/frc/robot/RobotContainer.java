@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.util.Ping;
+import frc.lib.util.Task;
 import frc.robot.commands.CommandBuilder;
 import frc.robot.commands.components.SwerveHandler;
 import frc.robot.subsystems.IntakeIndexer;
@@ -53,7 +54,7 @@ public class RobotContainer {
   private boolean operatorOverride = false;
   
   private Pose3d targetPose3d = new Pose3d();
-  private Ping targetPing = new Ping();
+  private Task targetTask = new Task();
 
   public RobotContainer() {
 
@@ -70,7 +71,7 @@ public class RobotContainer {
             () -> driveController.rightTrigger().getAsBoolean(), // Field-oriented driving (yes or no)
             () -> operatorOverride,
             () -> targetPose3d,
-            () -> targetPing.get()
+            () -> targetTask
         )
     );
 
@@ -85,7 +86,7 @@ public class RobotContainer {
 
   private void configureBindings() {
     driveController.axisGreaterThan(0, 0.1).onTrue(new InstantCommand(() -> {
-      targetPing.ping();
+      targetTask.advanceStage();
     }));
 
     driveController.axisGreaterThan(1, 0.1).onTrue(new InstantCommand(() -> {
