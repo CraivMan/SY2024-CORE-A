@@ -13,8 +13,11 @@ import frc.robot.subsystems.Swerve;
 
 public class SwerveHandler extends Command {
 
-    private BooleanSupplier booleanSupplier;
-    private Pose3dSupplier pose3dSupplier;
+    private boolean robotControl;
+    private BooleanSupplier operatorOverride;
+
+    private Pose3dSupplier targetPose;
+    private BooleanSupplier ifPinged;
 
     private Swerve s_Swerve;
     private DoubleSupplier translationSup;
@@ -32,23 +35,37 @@ public class SwerveHandler extends Command {
       DoubleSupplier strafeSup,
       DoubleSupplier rotationSup,
       BooleanSupplier robotCentricSup,
-      BooleanSupplier booleanSupplier,
-      Pose3dSupplier poseSupplier) {
+      BooleanSupplier operatorOverride,
+      Pose3dSupplier poseSupplier,
+      BooleanSupplier ifPinged) {
     this.s_Swerve = s_Swerve;
     addRequirements(s_Swerve);
 
-    this.booleanSupplier = booleanSupplier;
-    this.pose3dSupplier = poseSupplier;
+    this.operatorOverride = operatorOverride;
+
+    this.targetPose = poseSupplier;
+    this.ifPinged = ifPinged;
 
     this.translationSup = translationSup;
     this.strafeSup = strafeSup;
     this.rotationSup = rotationSup;
     this.robotCentricSup = robotCentricSup;
-  }
+    }
+
 
     @Override
     public void execute() {
-        if (booleanSupplier.getAsBoolean()) {
+        if (ifPinged.getAsBoolean()) {
+            System.out.println("PING RECEIVEEEED");
+            robotControl = true;
+        }
+
+        if (operatorOverride.getAsBoolean()) {
+            robotControl = false;
+        }
+
+
+        if (!robotControl) {
             /* Get Values, Deadband*/
             double translationVal =
                 translationLimiter.calculate(
@@ -67,11 +84,11 @@ public class SwerveHandler extends Command {
                 !robotCentricSup.getAsBoolean(),
                 true);
 
-            System.out.println("USER");
+            // System.out.println("USER");
         } else {
-            s_Swerve.advanceToTarget(pose3dSupplier.getAsPose3d());
+            s_Swerve.advanceToTarget(targetPose.getAsPose3d());
 
-            System.out.println("ROBOT");
+            // System.out.println("ROBOT");
         }
     }
 }

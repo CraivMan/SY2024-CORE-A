@@ -6,11 +6,11 @@ package frc.lib.util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 
 /** Add your docs here. */
 public class AprilTag {
 
-  private Translation2d vecToTarget;
   private double relX, relY, relZ;
   private Rotation2d rot;
 
@@ -39,5 +39,7 @@ public class AprilTag {
     return new Translation2d(relX, relY);
   }
 
-
+  public Translation3d toRobot3dTranslation() {
+    return new Translation3d(relX, relY, relZ);
+  }
 }

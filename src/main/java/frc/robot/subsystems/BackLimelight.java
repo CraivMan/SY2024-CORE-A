@@ -13,27 +13,35 @@ public class BackLimelight extends SubsystemBase {
     private OptionalDouble ty = OptionalDouble.empty();
 
     public boolean hasTarget() {
-        return (Optional.of(LimelightHelpers.getBotPose2d(Vision.BackLimelight.Name)).isPresent());
+        return (Optional.of(LimelightHelpers.getTX(Vision.BackLimelight.Name)).isPresent());
     }
 
     public OptionalDouble getLateralAngleToTarget() {
-        return tx;
+        return OptionalDouble.of(LimelightHelpers.getTX(Vision.BackLimelight.Name));
     }
 
     public OptionalDouble getVerticalAngleToTarget() {
-        return ty;
+        return OptionalDouble.of(LimelightHelpers.getTY(Vision.BackLimelight.Name));
     }
 
+    // public OptionalDouble getLateralAngleToTarget() {
+    //     return tx;
+    // }
 
-    @Override
-    public void periodic() {
-        if (hasTarget()) {
-            tx = OptionalDouble.of(LimelightHelpers.getTX(Vision.BackLimelight.Name));
-            ty = OptionalDouble.of(LimelightHelpers.getTY(Vision.BackLimelight.Name));
-        } else {
-            tx = OptionalDouble.empty();
-            ty = OptionalDouble.empty();
-        }
-    }
+    // public OptionalDouble getVerticalAngleToTarget() {
+    //     return ty;
+    // }
+
+
+    // @Override
+    // public void periodic() {
+    //     if (hasTarget()) {
+    //         tx = OptionalDouble.of(LimelightHelpers.getTX(Vision.BackLimelight.Name));
+    //         ty = OptionalDouble.of(LimelightHelpers.getTY(Vision.BackLimelight.Name));
+    //     } else {
+    //         tx = OptionalDouble.empty();
+    //         ty = OptionalDouble.empty();
+    //     }
+    // }
 
 }

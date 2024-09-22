@@ -91,7 +91,8 @@ public class Swerve extends SubsystemBase {
   public void advanceToTarget(Pose3d target) {
     SwerveModuleState[] states =
         Constants.Swerve.swerveKinematics.toSwerveModuleStates(
-          new ChassisSpeeds(target.getX(), target.getY(), target.getRotation().getAngle()));
+          // new ChassisSpeeds(target.getX(), target.getY(), target.getRotation().getAngle()));
+          new ChassisSpeeds(target.getX() / 2, target.getY() / 2, target.getRotation().getAngle()));
 
 
     setModuleStates(states, false);
@@ -160,7 +161,7 @@ public class Swerve extends SubsystemBase {
       .getDistance(botpose.getTranslation());
 
     //has valid targets
-    if(LimelightHelpers.getTA("limelight-front") > 0.05) {
+    if (LimelightHelpers.getTA("limelight-front") > 0.05) {
       double xyStdDev;
       double thetaStdDev;
       double numTargets = LimelightHelpers.getBotPose_wpiBlue("limelight-front")[5];

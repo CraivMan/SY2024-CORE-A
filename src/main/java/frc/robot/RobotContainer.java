@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.lib.util.Ping;
 import frc.robot.commands.CommandBuilder;
 import frc.robot.commands.components.SwerveHandler;
 import frc.robot.subsystems.IntakeIndexer;
@@ -49,8 +50,10 @@ public class RobotContainer {
   private final IntakeIndexer intakeIndexer = new IntakeIndexer();
   private final Shooter shooter = new Shooter();
 
-  private boolean robotSwerve = true;
+  private boolean operatorOverride = false;
+  
   private Pose3d targetPose3d = new Pose3d();
+  private Ping targetPing = new Ping();
 
   public RobotContainer() {
 
@@ -65,8 +68,9 @@ public class RobotContainer {
             () -> -driveController.getLeftX(), // Strafe
             () -> -driveController.getRightX(), // Rotation
             () -> driveController.rightTrigger().getAsBoolean(), // Field-oriented driving (yes or no)
-            () -> robotSwerve,
-            () -> targetPose3d
+            () -> operatorOverride,
+            () -> targetPose3d,
+            () -> targetPing.get()
         )
     );
 
@@ -81,7 +85,11 @@ public class RobotContainer {
 
   private void configureBindings() {
     driveController.axisGreaterThan(0, 0.1).onTrue(new InstantCommand(() -> {
-      robotSwerve = !robotSwerve;
+      targetPing.ping();
+    }));
+
+    driveController.axisGreaterThan(1, 0.1).onTrue(new InstantCommand(() -> {
+      operatorOverride = !operatorOverride;
     }));
   }
 
